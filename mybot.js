@@ -28,7 +28,7 @@ function get_available_items(){
     for(var j=0; j<HEIGHT; j++) {
 	  var item_type = board[i][j];
 	  if(item_type>0){
-	   available_items.push(new Point(i, j, item_type));
+	   available_items.push(new Item(item_type, i, j));
 	  }
 	}
   }
@@ -36,9 +36,9 @@ function get_available_items(){
   return available_items;
 }
 
-function Point(x,y,item_type){
+function Item(x,y,item_type){
+  this.item_type = item_type;
   this.x = x;
   this.y = y;
-  this.item_type = item_type;
 }
 
