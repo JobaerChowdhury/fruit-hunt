@@ -20,6 +20,14 @@ function make_move() {
 }
 
 
+function update_strategy(){
+  // will be called each time before taking next step. 
+}
+
+function next_best(){
+  // return the next best item to go for 
+}
+
 function get_available_items(){
   var available_items = new Array();
   
@@ -36,7 +44,7 @@ function get_available_items(){
   return available_items;
 }
 
-function Item(x,y,item_type){
+function Item(item_type, x, y){
   this.item_type = item_type;
   this.x = x;
   this.y = y;
