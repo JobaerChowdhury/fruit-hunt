@@ -31,6 +31,9 @@ function update_strategy(){
 
 function next_best(){
   var available_map = get_available_total(); 
+  //now sort this according to minimum number available. 
+  available_map.sort(sortByAvailability);
+  var test = 12;
 
   // strategy --- which item has minimum numbers.   
   
@@ -50,10 +53,10 @@ function next_best(){
 function get_available_total(){
    var number_it = get_number_of_item_types();
    
-   var available_total = {};
+   var available_total = new Array();
    for(var i=1; i<= number_it; i++) {
      var available = get_total_item_count(i) - get_opponent_item_count(i);
-	 available_total[i] = available;
+	 available_total.push(new ItemAvailability(i, available));
    }
    return available_total;
 }
@@ -81,6 +84,16 @@ function Item(item_type, x, y){
 }
 
 
+function ItemAvailability(item_type, available) {
+  this.item_type = item_type;
+  this.available = available;
+}
+
+function sortByAvailability(a, b) {
+  var x = a.available;
+  var y = b.available;
+  return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+}
 
 /* 
  Assumptions - 
