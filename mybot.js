@@ -10,7 +10,7 @@ function make_move() {
     // only take if it is worthy!
     var item_type = board[get_my_x()][get_my_y()];
     if (item_type > 0) {
-        if (!opponent_contains_more(new Item(item_type, new Point(get_my_x(), get_my_y())))) {
+        if (is_beneficial(new Item(item_type, new Point(get_my_x(), get_my_y())))) {
             return TAKE;
         }
     }
@@ -69,12 +69,24 @@ function make_random_move() {
     return PASS;
 }
 
-function opponent_contains_more(item) {
+function is_beneficial(target_item) {
+    return !opponent_has_more_than_half(target_item) && !i_have_more_than_half(target_item);
+}
+
+function opponent_has_more_than_half(item) {
     var item_type = item.item_type;
     var total = get_total_item_count(item_type);
-    var opponent_have = get_opponent_item_count(item_type);
+    var opponent_has = get_opponent_item_count(item_type);
 
-    return opponent_have > Math.floor(total / 2.0);
+    return opponent_has > Math.floor(total / 2.0);
+}
+
+function i_have_more_than_half(item) {
+    var item_type = item.item_type;
+    var total = get_total_item_count(item_type);
+    var i_have = get_my_item_count(item_type);
+
+    return i_have > Math.floor(total / 2.0);
 }
 
 function is_worthy(my_position, opponent_position, target_item) {
@@ -82,7 +94,7 @@ function is_worthy(my_position, opponent_position, target_item) {
         return distance(my_position, target_item.position) <= distance(opponent_position, target_item.position);
     }
 
-    return opponent_is_not_closer() && !opponent_contains_more(target_item);
+    return opponent_is_not_closer() && is_beneficial(target_item);
 }
 
 function get_items_sorted_by_closeness(my_position, items) {
@@ -216,4 +228,4 @@ function recursive_path_calculator(result, source, dest) {
 /* 
  Assumption - It seems if the number of item types is 4 then the specific types will be 1,2,3,4. 
  If this assumptions turns out to be wrong then code needs to be fixed.
-*/
+ */
