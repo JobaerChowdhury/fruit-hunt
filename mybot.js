@@ -1,6 +1,5 @@
 //todo - optimize javascript - minimize visibility, scopes etc - read the best practices and apply those
 //todo - there are a lot of top-level functions, may be that can be minimized.
-
 function new_game() {
 
 }
@@ -13,10 +12,6 @@ function make_move() {
         return TAKE;
     }
 
-    var available_map = get_available_total();
-    //now sort this according to minimum number available.
-    available_map.sort(sortByAvailability);
-
     var my_position = new Point(get_my_x(), get_my_y());
     var opponent_position = new Point(get_opponent_x(), get_opponent_y());
 
@@ -24,6 +19,8 @@ function make_move() {
     // find all the occurrences of it in the board
     // which one is closes?
     // is it worth to pursue it - if yes, then go for that direction
+
+    var available_map = get_total_sorted_by_availability();
     while (available_map.length > 0) {
         var current = available_map.shift();
         var current_type = current.item_type;
@@ -40,6 +37,18 @@ function make_move() {
 
     //if nothing matches above then return a random move
     return make_random_move();
+}
+
+function get_total_sorted_by_availability() {
+    var available_map = get_available_total();
+
+    //now sort this according to minimum number available.
+    function sortByAvailability(a, b) {
+        return ((a.available < b.available) ? -1 : ((a.available > b.available) ? 1 : 0));
+    }
+    available_map.sort(sortByAvailability);
+
+    return available_map;
 }
 
 function make_random_move() {
@@ -131,12 +140,6 @@ function ItemAvailability(item_type, available) {
     this.available = available;
 }
 
-function sortByAvailability(a, b) {
-    var x = a.available;
-    var y = b.available;
-    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-}
-
 function Point(x, y) {
     this.x = x;
     this.y = y;
@@ -202,6 +205,3 @@ function recursive_path_calculator(result, source, dest) {
  Assumption - It seems if the number of item types is 4 then the specific types will be 1,2,3,4. 
  If this assumptions turns out to be wrong then code needs to be fixed. 
  */
-
-// find some suitable data structures. 
-// Node, priority
