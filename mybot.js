@@ -111,7 +111,7 @@ function Point(x, y){
  This will compute and return the distance between source and destination. 
 */
 function distance(source, dest){
-  // from source progress by 1 until you reach the dest. -- no, use just mathematics since the paths are simple
+  // use just mathematics since the paths are simple
   if(source.x == dest.x && source.y == dest.y){
     return 0;
   } else if(source.x == dest.x) {
@@ -128,7 +128,24 @@ function distance(source, dest){
  from source to dest by following the shortest path. 
 */
 function shortest_path_between_points(source, dest){
+  return recursive_path_calculator(new Array(), source, dest);
+}
 
+function recursive_path_calculator(result, source, dest){
+  if(source.x == dest.x && source.y == dest.y) {
+    return result;
+  } else if(source.x == dest.x) {
+    if(source.y > dest.y) {
+
+
+	} else {
+	  // go right/east
+	}
+  } else if(source.y == dest.y) {
+  
+  } else {
+  
+  }
 }
 
 
