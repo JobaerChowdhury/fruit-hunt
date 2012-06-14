@@ -1,17 +1,48 @@
+//todo - optimize javascript - minimize visibility, scopes etc - read the best practices and apply those
+//todo - there are a lot of top-level functions, may be that can be minimized.
+
 function new_game() {
 
 }
 
 function make_move() {
-    var board = get_board();
-
-    next_best();
-
     // we found an item! take it!
     if (board[get_my_x()][get_my_y()] > 0) {
         return TAKE;
     }
 
+    var available_map = get_available_total();
+    //now sort this according to minimum number available.
+    available_map.sort(sortByAvailability);
+
+    var my_position = new Point(get_my_x(), get_my_y());
+    var opponent_position = new Point(get_opponent_x(), get_opponent_y());
+
+    var test = 12;
+
+    //start with the least available item
+    // find all the occurrences of it in the board
+    // which one is closes?
+    // is it worth to pursue it - if yes, then go for that direction
+    while (available_map.length > 0) {
+        var current = available_map.shift();
+        var current_type = current.item_type;
+        var all_items_of_type = get_existing_items_of_type(current_type);
+        var sorted_items = get_items_sorted_by_closeness(my_position, all_items_of_type);
+        for (var i = 0; i < sorted_items.length; i++) {
+            var current_item = sorted_items[i];
+            if (is_worthy(my_position, opponent_position, current_item.point)) {
+                //pursue the item
+                return shortest_path_between_points(my_position, current_item.point).shift();
+            }
+        }
+    }
+
+    //if nothing matches above then return a random move
+    return make_random_move();
+}
+
+function make_random_move() {
     var rand = Math.random() * 4;
 
     if (rand < 1) return NORTH;
@@ -29,29 +60,33 @@ function update_strategy() {
     // will be called each time before taking next step.
 }
 
-function next_best() {
-    var available_map = get_available_total();
-    //now sort this according to minimum number available.
-    available_map.sort(sortByAvailability);
-    var test = 12;
-
-    // strategy --- which item has minimum numbers.
-
-
-    /*  is it worth to pursue that type of item?  -- pursue if you are closer or same distance than opponent.
-     which is the closest?
-     is the opponent closer than me?
-     go for that item.
-
-     */
+function is_worthy(my_position, opponent_position, target) {
+    return distance(my_position, target) <= distance(opponent_position, target);
 }
 
-/*
- Small problems to solve - 
- - finding the distance between two points
- - finding the optimal route between two points.
- */
+function get_items_sorted_by_closeness(my_position, items) {
+    function comparator_by_distance(a, b) {
+        var distance_from_a = distance(my_position, a.point);
+        var distance_from_b = distance(my_position, b.point);
+        return ((distance_from_a < distance_from_b) ? -1 : ((distance_from_a > distance_from_b) ? 1 : 0));
+    }
 
+    return items.sort(comparator_by_distance);
+}
+
+function get_existing_items_of_type(item_type) {
+    var result = new Array();
+
+    var available_items = get_available_items();
+    for (var i = 0; i < available_items.length; i++) {
+        var item = available_items[i];
+        if (item.item_type == item_type) {
+            result.push(item);
+        }
+    }
+
+    return result;
+}
 
 /*
  Returns a map - containing the number of items available for picking or owned. This map will be used 
