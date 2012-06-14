@@ -62,13 +62,6 @@ function make_random_move() {
     return PASS;
 }
 
-// maybe sort all the items and give them some priority. then go after one by one. at the 
-// begining of each move re-calculate the priorities.
-
-function update_strategy() {
-    // will be called each time before taking next step.
-}
-
 function is_worthy(my_position, opponent_position, target) {
     return distance(my_position, target) <= distance(opponent_position, target);
 }
