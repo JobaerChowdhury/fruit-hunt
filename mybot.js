@@ -6,6 +6,8 @@ function new_game() {
 }
 
 function make_move() {
+    var board = get_board();
+
     // we found an item! take it!
     if (board[get_my_x()][get_my_y()] > 0) {
         return TAKE;
