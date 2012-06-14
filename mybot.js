@@ -96,21 +96,45 @@ function ItemAvailability(item_type, available) {
   this.available = available;
 }
 
-function Point(x, y){
-  this.x = x;
-  this.y = y;
-}
-
 function sortByAvailability(a, b) {
   var x = a.available;
   var y = b.available;
   return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 }
 
-/* 
- Assumptions - 
- It seems if the number of item types is 4 then the specific types will be 1,2,3,4. 
+function Point(x, y){
+  this.x = x;
+  this.y = y;
+}
 
+/*
+ This will compute and return the distance between source and destination. 
+*/
+function distance(source, dest){
+  // from source progress by 1 until you reach the dest. -- no, use just mathematics since the paths are simple
+  if(source.x == dest.x && source.y == dest.y){
+    return 0;
+  } else if(source.x == dest.x) {
+    return Math.abs(source.y - dest.y);
+  } else if(source.y == dest.y) {
+    return Math.abs(source.x - dest.x);
+  } else {
+    return distance(source, new Point(dest.x, source.y)) + distance(new Point(dest.x, source.y), dest);
+  }
+}
+
+/*
+ This will return an array containing the moves that needs to be performed to reach 
+ from source to dest by following the shortest path. 
+*/
+function shortest_path_between_points(source, dest){
+
+}
+
+
+/* 
+ Assumption - It seems if the number of item types is 4 then the specific types will be 1,2,3,4. 
+ If this assumptions turns out to be wrong then code needs to be fixed. 
 */
 
 // find some suitable data structures. 
