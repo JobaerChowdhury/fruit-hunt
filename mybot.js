@@ -24,7 +24,9 @@ function make_move() {
     while (available_map.length > 0) {
         var current = available_map.shift();
         var current_type = current.item_type;
+
         var all_items_of_type = get_existing_items_of_type(current_type);
+
         var sorted_items = get_items_sorted_by_closeness(my_position, all_items_of_type);
         for (var i = 0; i < sorted_items.length; i++) {
             var current_item = sorted_items[i];
@@ -168,21 +170,21 @@ function recursive_path_calculator(result, source, dest) {
     } else if (source.x == dest.x) {
         if (source.y > dest.y) {
             // go left/west
-            result.push(WEST);
+            result.push(NORTH);
             return recursive_path_calculator(result, new Point(source.x, (source.y - 1)), dest);
         } else {
             // go right/east
-            result.push(EAST);
+            result.push(SOUTH);
             return recursive_path_calculator(result, new Point(source.x, (source.y + 1)), dest)
         }
     } else if (source.y == dest.y) {
         if (source.x > dest.x) {
             //go up/ north
-            result.push(NORTH);
+            result.push(WEST);
             return recursive_path_calculator(result, new Point((source.x - 1), source.y), dest);
         } else {
             // go down/south
-            result.push(SOUTH);
+            result.push(EAST);
             return recursive_path_calculator(result, new Point((source.x + 1), source.y), dest);
         }
     } else {
