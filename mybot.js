@@ -36,6 +36,7 @@ function next_best(){
   var test = 12;
 
   // strategy --- which item has minimum numbers.   
+
   
   /*  is it worth to pursue that type of item?  -- pursue if you are closer or same distance than opponent.
        which is the closest?
@@ -44,6 +45,12 @@ function next_best(){
 		   
   */
 }
+
+/*
+ Small problems to solve - 
+   - finding the distance between two points
+   - finding the optimal route between two points. 
+*/
 
 
 /*
@@ -69,7 +76,8 @@ function get_available_items(){
     for(var j=0; j<HEIGHT; j++) {
 	  var item_type = board[i][j];
 	  if(item_type>0){
-	   available_items.push(new Item(item_type, i, j));
+	   var p = new Point(i, j);
+	   available_items.push(new Item(item_type, p));
 	  }
 	}
   }
@@ -77,16 +85,20 @@ function get_available_items(){
   return available_items;
 }
 
-function Item(item_type, x, y){
+function Item(item_type, point){
   this.item_type = item_type;
-  this.x = x;
-  this.y = y;
+  this.point = point;
 }
 
 
 function ItemAvailability(item_type, available) {
   this.item_type = item_type;
   this.available = available;
+}
+
+function Point(x, y){
+  this.x = x;
+  this.y = y;
 }
 
 function sortByAvailability(a, b) {
