@@ -188,9 +188,9 @@ function recursive_path_calculator(result, source, dest) {
             return recursive_path_calculator(result, new Point((source.x + 1), source.y), dest);
         }
     } else {
-        var normalizedPoint = new Point(dest.x, source.y);
-        var path1 = recursive_path_calculator(new Array(), source, normalizedPoint);
-        var path2 = recursive_path_calculator(new Array(), normalizedPoint, dest);
+        var intermediate_point = new Point(dest.x, source.y);
+        var path1 = recursive_path_calculator(new Array(), source, intermediate_point);
+        var path2 = recursive_path_calculator(new Array(), intermediate_point, dest);
         return path1.concat(path2);
     }
 }
