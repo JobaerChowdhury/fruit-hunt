@@ -18,8 +18,6 @@ function make_move() {
     var my_position = new Point(get_my_x(), get_my_y());
     var opponent_position = new Point(get_opponent_x(), get_opponent_y());
 
-    var test = 12;
-
     //start with the least available item
     // find all the occurrences of it in the board
     // which one is closes?
