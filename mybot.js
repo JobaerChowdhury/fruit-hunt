@@ -136,15 +136,29 @@ function recursive_path_calculator(result, source, dest) {
         return result;
     } else if (source.x == dest.x) {
         if (source.y > dest.y) {
-
-
+            // go left/west
+            result.push(WEST);
+            return recursive_path_calculator(result, new Point(source.x, (source.y - 1)), dest);
         } else {
             // go right/east
+            result.push(EAST);
+            return recursive_path_calculator(result, new Point(source.x, (source.y + 1)), dest)
         }
     } else if (source.y == dest.y) {
-
+        if (source.x > dest.x) {
+            //go up/ north
+            result.push(NORTH);
+            return recursive_path_calculator(result, new Point((source.x - 1), source.y), dest);
+        } else {
+            // go down/south
+            result.push(SOUTH);
+            return recursive_path_calculator(result, new Point((source.x + 1), source.y), dest);
+        }
     } else {
-
+        var normalizedPoint = new Point(dest.x, source.y);
+        var path1 = recursive_path_calculator(new Array(), source, normalizedPoint);
+        var path2 = recursive_path_calculator(new Array(), normalizedPoint, dest);
+        return path1.concat(path2);
     }
 }
 
