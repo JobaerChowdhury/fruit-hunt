@@ -7,9 +7,12 @@ function new_game() {
 function make_move() {
     var board = get_board();
 
-    // we found an item! take it!
-    if (board[get_my_x()][get_my_y()] > 0) {
-        return TAKE;
+    // only take if it is worthy!
+    var item_type = board[get_my_x()][get_my_y()];
+    if (item_type > 0) {
+        if (!opponent_contains_more(new Item(item_type, new Point(get_my_x(), get_my_y())))) {
+            return TAKE;
+        }
     }
 
     var my_position = new Point(get_my_x(), get_my_y());
@@ -37,6 +40,7 @@ function make_move() {
         }
     }
 
+    //todo - find better alternative than this.
     //if nothing matches above then return a random move
     return make_random_move();
 }
@@ -48,6 +52,7 @@ function get_total_sorted_by_availability() {
     function sortByAvailability(a, b) {
         return ((a.available < b.available) ? -1 : ((a.available > b.available) ? 1 : 0));
     }
+
     available_map.sort(sortByAvailability);
 
     return available_map;
@@ -64,12 +69,20 @@ function make_random_move() {
     return PASS;
 }
 
+function opponent_contains_more(item) {
+    var item_type = item.item_type;
+    var total = get_total_item_count(item_type);
+    var opponent_have = get_opponent_item_count(item_type);
+
+    return opponent_have > Math.floor(total / 2.0);
+}
+
 function is_worthy(my_position, opponent_position, target_item) {
     function opponent_is_not_closer() {
         return distance(my_position, target_item.position) <= distance(opponent_position, target_item.position);
     }
 
-    return opponent_is_not_closer();
+    return opponent_is_not_closer() && !opponent_contains_more(target_item);
 }
 
 function get_items_sorted_by_closeness(my_position, items) {
@@ -202,5 +215,5 @@ function recursive_path_calculator(result, source, dest) {
 
 /* 
  Assumption - It seems if the number of item types is 4 then the specific types will be 1,2,3,4. 
- If this assumptions turns out to be wrong then code needs to be fixed. 
- */
+ If this assumptions turns out to be wrong then code needs to be fixed.
+*/
