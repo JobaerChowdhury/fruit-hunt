@@ -30,9 +30,9 @@ function make_move() {
         var sorted_items = get_items_sorted_by_closeness(my_position, all_items_of_type);
         for (var i = 0; i < sorted_items.length; i++) {
             var current_item = sorted_items[i];
-            if (is_worthy(my_position, opponent_position, current_item.point)) {
+            if (is_worthy(my_position, opponent_position, current_item)) {
                 //pursue the item
-                return shortest_path_between_points(my_position, current_item.point).shift();
+                return shortest_path_between_points(my_position, current_item.position).shift();
             }
         }
     }
@@ -64,14 +64,18 @@ function make_random_move() {
     return PASS;
 }
 
-function is_worthy(my_position, opponent_position, target) {
-    return distance(my_position, target) <= distance(opponent_position, target);
+function is_worthy(my_position, opponent_position, target_item) {
+    function opponent_is_not_closer() {
+        return distance(my_position, target_item.position) <= distance(opponent_position, target_item.position);
+    }
+
+    return opponent_is_not_closer();
 }
 
 function get_items_sorted_by_closeness(my_position, items) {
     function comparator_by_distance(a, b) {
-        var distance_from_a = distance(my_position, a.point);
-        var distance_from_b = distance(my_position, b.point);
+        var distance_from_a = distance(my_position, a.position);
+        var distance_from_b = distance(my_position, b.position);
         return ((distance_from_a < distance_from_b) ? -1 : ((distance_from_a > distance_from_b) ? 1 : 0));
     }
 
@@ -126,7 +130,7 @@ function get_available_items() {
 
 function Item(item_type, point) {
     this.item_type = item_type;
-    this.point = point;
+    this.position = point;
 }
 
 
