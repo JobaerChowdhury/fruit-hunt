@@ -190,6 +190,20 @@ function distance(source, dest) {
  * Follow the one that maximizes profit. - assign each worthy fruit as 1. next step would be multiplied by availability factor.
  */
 function all_paths(source, dest) {
+    if(source.x + source.y >= dest.x + dest.y) {
+        var intermediate = all_paths_compute(dest, source);
+        var paths = new Array();
+        for(var i=0; i< intermediate.length; i++) {
+            paths.push(intermediate[i].reverse());
+            return paths;
+        }
+    } else {
+        return all_paths_compute(source, dest);
+    }
+}
+
+
+function all_paths_compute(source, dest) {
     var paths = new Paths();
     var path = new Path();
     path.add(source);
@@ -255,6 +269,14 @@ function Path() {
         return nodes[nodes.length - 1];
     };
 
+    this.reverse = function () {
+        var return_val = new Array();
+        for (var i = 0; i < nodes.length; i++) {
+            return_val.push(nodes[i]);
+        }
+        return return_val.reverse();
+    };
+
     this.get_path = function () {
         var return_val = new Array();
         for (var i = 0; i < nodes.length; i++) {
@@ -295,7 +317,7 @@ function Path() {
     }
 }
 
-function get_reachables(source) {
+function compute_reachability(source) {
     var result = new Array();
     var new_x = source.x + 1;
     var new_y = source.y + 1;
@@ -310,6 +332,11 @@ function get_reachables(source) {
     }
 
     return result;
+}
+
+function get_reachables(source) {
+    //todo - faster the implementation by storing the result into a map
+    return compute_reachability(source);
 }
 
 /*
