@@ -210,13 +210,18 @@ function Paths() {
     };
 
     this.expand_paths = function () {
-        //todo - handle empty returns - when no more expand is possible.
         var new_paths = new Array();
         for (var i = 0; i < paths.length; i++) {
             var current_path = paths[i];
             var expandeds = current_path.expand();
-            for (var j = 0; j < expandeds.length; j++) {
-                new_paths.push(expandeds[j]);
+            if (expandeds.length == 0) {
+                //this means the path is not possible to expand further. we should just add it.
+                new_paths.push(current_path);
+            } else {
+                //add all the paths that are expanded.
+                for (var j = 0; j < expandeds.length; j++) {
+                    new_paths.push(expandeds[j]);
+                }
             }
         }
         paths = new_paths;
@@ -253,8 +258,12 @@ function Path() {
         return new_path;
     };
 
+    /*
+    * Will a expand a path by adding reachable items. If there is no reachable items then empty array will be returned
+    * meaning it is not possible to expand further.
+    *
+    * */
     this.expand = function () {
-        //todo - handle empty returns - in case when the get_reachables() returns empty list
         var paths = new Array();
         var reachables = get_reachables(this.get_tail());
         for (var i = 0; i < reachables.length; i++) {
