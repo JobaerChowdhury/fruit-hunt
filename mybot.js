@@ -201,8 +201,7 @@ function all_paths(source, dest) {
     }
 
     //get rid of all the paths that doesn't end in the dest
-    var filtered_paths = paths.filter_by_dest(dest);
-    return filtered_paths;
+    return paths.filter_by_dest(dest);
 }
 
 function Paths() {
@@ -312,24 +311,6 @@ function get_reachables(source) {
 
     return result;
 }
-
-/*var a = new Point(0, 0);
- var p = new Path();
- p.add(a);
- p.add(new Point(0, 1));
- p.add(new Point(1, 1));
-
- var paths = new Paths();
- paths.add(p);
- paths.expand_paths();
- paths.expand_paths();
- paths.expand_paths();
-
- var xx = paths.get_paths();
- for(var j=0; j<xx.length; j++) {
- console.log(xx[j].get_path());
- }
- */
 
 /*
  This will return an array containing the moves that needs to be performed to reach 
