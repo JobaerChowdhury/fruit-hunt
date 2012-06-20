@@ -40,7 +40,7 @@ function make_move() {
         }
     }
 
-    //todo - find better alternative than this.
+    //todo - find better alternative than this. - like pursue closes item.
     //if nothing matches above then return a random move
     return make_random_move();
 }
@@ -170,7 +170,7 @@ function Point(x, y) {
 }
 
 /*
- This will compute and return the distance between source and destination. 
+ This will compute and return the distance between source and destination.
  */
 function distance(source, dest) {
     // use just mathematics since the paths are simple
@@ -184,6 +184,121 @@ function distance(source, dest) {
         return distance(source, new Point(dest.x, source.y)) + distance(new Point(dest.x, source.y), dest);
     }
 }
+
+/**
+ * Find all possible shortest paths between two points
+ * Follow the one that maximizes profit. - assign each worthy fruit as 1. next step would be multiplied by availability factor.
+ */
+function all_paths(source, dest) {
+    // add source to path
+    // for all reachable items from this path
+    // create new paths by adding these nodes
+}
+
+function Paths() {
+    var paths = new Array();
+    this.get_paths = function () {
+        var r = new Array();
+        for (var i = 0; i < paths.length; i++) {
+            r.push(paths[i]);
+        }
+        return r;
+    };
+
+    this.add = function (p) {
+        paths.push(p);
+    };
+
+    this.expand_paths = function () {
+        //todo - handle empty returns - when no more expand is possible.
+        var new_paths = new Array();
+        for (var i = 0; i < paths.length; i++) {
+            var current_path = paths[i];
+            var expandeds = current_path.expand();
+            for (var j = 0; j < expandeds.length; j++) {
+                new_paths.push(expandeds[j]);
+            }
+        }
+        paths = new_paths;
+    }
+}
+
+function Path() {
+    var nodes = new Array();
+    this.get_tail = function () {
+        return nodes[nodes.length - 1];
+    };
+
+    this.get_path = function () {
+        var return_val = new Array();
+        for (var i = 0; i < nodes.length; i++) {
+            return_val.push(nodes[i]);
+        }
+        return return_val;
+    };
+
+    this.add = function (node) {
+        nodes.push(node);
+    };
+
+    this.length = function () {
+        return nodes.length;
+    };
+
+    this.make_copy = function () {
+        var new_path = new Path();
+        for (var i = 0; i < nodes.length; i++) {
+            new_path.add(nodes[i]);
+        }
+        return new_path;
+    };
+
+    this.expand = function () {
+        //todo - handle empty returns - in case when the get_reachables() returns empty list
+        var paths = new Array();
+        var reachables = get_reachables(this.get_tail());
+        for (var i = 0; i < reachables.length; i++) {
+            paths[i] = this.make_copy();
+            paths[i].add(reachables[i]);
+        }
+        return paths;
+    }
+}
+
+function get_reachables(source) {
+    var result = new Array();
+    var new_x = source.x + 1;
+    var new_y = source.y + 1;
+    if (new_x >= WIDTH && new_y >= HEIGHT) {
+    } else if (new_x >= WIDTH && new_y < HEIGHT) {
+        result.push(new Point(source.x, new_y));
+    } else if (new_x < WIDTH && new_y >= HEIGHT) {
+        result.push(new Point(new_x, source.y));
+    } else {
+        result.push(new Point(source.x, new_y));
+        result.push(new Point(new_x, source.y));
+    }
+
+    return result;
+}
+
+/*var a = new Point(0, 0);
+ var p = new Path();
+ p.add(a);
+ p.add(new Point(0, 1));
+ p.add(new Point(1, 1));
+
+ var paths = new Paths();
+ paths.add(p);
+ paths.expand_paths();
+ paths.expand_paths();
+ paths.expand_paths();
+
+ var xx = paths.get_paths();
+ for(var j=0; j<xx.length; j++) {
+ console.log(xx[j].get_path());
+ }
+ */
 
 /*
  This will return an array containing the moves that needs to be performed to reach 
@@ -223,9 +338,3 @@ function recursive_path_calculator(result, source, dest) {
         return path1.concat(path2);
     }
 }
-
-
-/* 
- Assumption - It seems if the number of item types is 4 then the specific types will be 1,2,3,4. 
- If this assumptions turns out to be wrong then code needs to be fixed.
- */
