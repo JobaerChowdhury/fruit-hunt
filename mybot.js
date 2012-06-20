@@ -190,9 +190,19 @@ function distance(source, dest) {
  * Follow the one that maximizes profit. - assign each worthy fruit as 1. next step would be multiplied by availability factor.
  */
 function all_paths(source, dest) {
-    // add source to path
-    // for all reachable items from this path
-    // create new paths by adding these nodes
+    var paths = new Paths();
+    var path = new Path();
+    path.add(source);
+    paths.add(path);
+
+    var dist = distance(source, dest);
+    for(var i=0; i<dist; i++) {
+        paths.expand_paths();
+    }
+
+    //get rid of all the paths that doesn't end in the dest
+    var filtered_paths = paths.filter_by_dest(dest);
+    return filtered_paths;
 }
 
 function Paths() {
@@ -207,6 +217,18 @@ function Paths() {
 
     this.add = function (p) {
         paths.push(p);
+    };
+
+    this.filter_by_dest = function(dest) {
+        var filtered_paths = new Array();
+        //add all the paths that ends in the dest and return that result.
+        for(var i=0; i<paths.length; i++) {
+            var tail = paths[i].get_tail();
+            if(tail.x == dest.x && tail.y == dest.y) {
+                filtered_paths.push(paths[i]);
+            }
+        }
+        return filtered_paths;
     };
 
     this.expand_paths = function () {
