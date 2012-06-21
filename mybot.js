@@ -170,19 +170,10 @@ function Point(x, y) {
 }
 
 /*
- This will compute and return the distance between source and destination.
+ This will compute and return the Manhattan distance between source and destination.
  */
 function distance(source, dest) {
-    // use just mathematics since the paths are simple
-    if (source.x == dest.x && source.y == dest.y) {
-        return 0;
-    } else if (source.x == dest.x) {
-        return Math.abs(source.y - dest.y);
-    } else if (source.y == dest.y) {
-        return Math.abs(source.x - dest.x);
-    } else {
-        return distance(source, new Point(dest.x, source.y)) + distance(new Point(dest.x, source.y), dest);
-    }
+    return Math.abs(dest.x - source.x) + Math.abs(dest.y - source.y);
 }
 
 
