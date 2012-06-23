@@ -38,7 +38,6 @@ function make_move() {
                 //pursue the item
                 var path = find_astar_path(my_position, current_item.position);
                 return follow_path(my_position, path);
-                //return shortest_path_between_points(my_position, current_item.position).shift();
             }
         }
     }
@@ -231,9 +230,16 @@ var astar = {
         }
     },
 
-    heuristic:function (node1, node2) {
+    heuristic:function (node, goal_node) {
+        var dist = distance(node, goal_node);
         //todo - considering distance only for now, in future - rarity,chance will be considered as well.
-        return distance(node1, node2);
+        //nodes having item on them has lower h score.
+        var item = get_board()[node.x][node.y];
+        var h_val = 1;
+        if(item > 0){
+            h_val = 0;
+        }
+        return dist + h_val;
     },
 
     neighbors:function (node, grid) {
@@ -257,7 +263,7 @@ var astar = {
         return result;
     },
 
-    search:function (start_position, end_position) {
+    search:function (start_position, goal) {
         var grid = [];
         for (var x = 0; x < WIDTH; x++) {
             grid[x] = [];
@@ -278,7 +284,7 @@ var astar = {
         while (openList.length > 0) {
             var currentNode = astar.get_lowest(openList);
             // End case -- result has been found, return the traced path
-            if (is_equal(currentNode.point, end_position)) {
+            if (is_equal(currentNode.point, goal)) {
                 return astar.get_path_from_node(currentNode);
             }
 
@@ -300,7 +306,7 @@ var astar = {
                 if (!astar.is_present(openList, neighbor)) {
                     // This the the first time we have arrived at this node, it must be the // Also, we need to take the h (heuristic) score since we haven't done
                     gScoreIsBest = true;
-                    neighbor.h = astar.heuristic(neighbor.point, end_position);
+                    neighbor.h = astar.heuristic(neighbor.point, goal);
                     openList.push(neighbor);
                 }
                 else if (gScore < neighbor.g) {
@@ -322,19 +328,19 @@ var astar = {
 };
 
 /*
-* Returns the direction to follow the path
-* */
+ * Returns the direction to follow the path
+ * */
 function follow_path(current_position, path) {
     var next_node = path[0];
-    if(current_position.x == next_node.x) {
-      if(next_node.y > current_position.y) {
-          return SOUTH;
-      }
-        else if(next_node.y < current_position.y) {
-          return NORTH;
-      }
+    if (current_position.x == next_node.x) {
+        if (next_node.y > current_position.y) {
+            return SOUTH;
+        }
+        else if (next_node.y < current_position.y) {
+            return NORTH;
+        }
     } else {
-        if(next_node.x > current_position.x) {
+        if (next_node.x > current_position.x) {
             // move right
             return EAST;
         } else {
