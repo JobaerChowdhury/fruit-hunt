@@ -36,8 +36,9 @@ function make_move() {
             var current_item = sorted_items[i];
             if (is_worthy(my_position, opponent_position, current_item)) {
                 //pursue the item
-                var test = find_astar_path(my_position, current_item.position);
-                return shortest_path_between_points(my_position, current_item.position).shift();
+                var path = find_astar_path(my_position, current_item.position);
+                return follow_path(my_position, path);
+                //return shortest_path_between_points(my_position, current_item.position).shift();
             }
         }
     }
@@ -208,7 +209,7 @@ var astar = {
         var curr = node;
         var ret = [];
         while (curr.parent) {
-            ret.push(curr);
+            ret.push(curr.point);
             curr = curr.parent;
         }
         return ret.reverse();
@@ -325,6 +326,29 @@ var astar = {
 };
 
 /*
+* Returns the direction to follow the path
+* */
+function follow_path(current_position, path) {
+    var next_node = path[0];
+    if(current_position.x == next_node.x) {
+      if(next_node.y > current_position.y) {
+          return SOUTH;
+      }
+        else if(next_node.y < current_position.y) {
+          return NORTH;
+      }
+    } else {
+        if(next_node.x > current_position.x) {
+            // move right
+            return EAST;
+        } else {
+            return WEST;
+        }
+    }
+    return PASS;
+}
+
+/*
  This will return an array containing the moves that needs to be performed to reach 
  from source to dest by following the shortest path. 
  */
@@ -337,21 +361,17 @@ function recursive_path_calculator(result, source, dest) {
         return result;
     } else if (source.x == dest.x) {
         if (source.y > dest.y) {
-            // go left/west
             result.push(NORTH);
             return recursive_path_calculator(result, new Point(source.x, (source.y - 1)), dest);
         } else {
-            // go right/east
             result.push(SOUTH);
             return recursive_path_calculator(result, new Point(source.x, (source.y + 1)), dest)
         }
     } else if (source.y == dest.y) {
         if (source.x > dest.x) {
-            //go up/ north
             result.push(WEST);
             return recursive_path_calculator(result, new Point((source.x - 1), source.y), dest);
         } else {
-            // go down/south
             result.push(EAST);
             return recursive_path_calculator(result, new Point((source.x + 1), source.y), dest);
         }
