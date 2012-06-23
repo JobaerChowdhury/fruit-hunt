@@ -170,14 +170,6 @@ function Point(x, y) {
     this.y = y;
 }
 
-function Astar_point(p) {
-    this.point = p;
-    this.g = 0;
-    this.f = 0;
-    this.h = 0;
-    this.parent = null;
-}
-
 function is_equal(first, second) {
     return (first.x == second.x && first.y == second.y);
 }
@@ -187,21 +179,6 @@ function is_equal(first, second) {
  */
 function distance(source, dest) {
     return Math.abs(dest.x - source.x) + Math.abs(dest.y - source.y);
-}
-
-function neighbors(node) {
-    var result = [];
-    if ((node.x + 1) >= WIDTH && (node.y + 1) >= HEIGHT) {
-    } else if ((node.x + 1) >= WIDTH && (node.y + 1) < HEIGHT) {
-        result.push(new Point(node.x, node.y + 1));
-    } else if ((node.x + 1) < WIDTH && (node.y + 1) >= HEIGHT) {
-        result.push(new Point(node.x + 1, node.y));
-    } else {
-        result.push(new Point(node.x, node.y + 1));
-        result.push(new Point(node.x + 1, node.y));
-    }
-
-    return result;
 }
 
 function find_astar_path(source, dest) {
@@ -256,11 +233,32 @@ var astar = {
         }
     },
 
-    search:function (start, end) {
+    heuristic: function (node1, node2) {
+        //todo - considering distance only for now, in future - rarity,chance will be considered as well.
+        return distance(node1, node2);
+    },
+
+    neighbors:function (node) {
+        var result = [];
+        if ((node.x + 1) >= WIDTH && (node.y + 1) >= HEIGHT) {
+        } else if ((node.x + 1) >= WIDTH && (node.y + 1) < HEIGHT) {
+            result.push(new Point(node.x, node.y + 1));
+        } else if ((node.x + 1) < WIDTH && (node.y + 1) >= HEIGHT) {
+            result.push(new Point(node.x + 1, node.y));
+        } else {
+            result.push(new Point(node.x, node.y + 1));
+            result.push(new Point(node.x + 1, node.y));
+        }
+
+        return result;
+    },
+
+search:function (start, end) {
         var grid = [];
         for (var x = 0; x < WIDTH; x++) {
             grid[x] = [];
             for (var y = 0; y < HEIGHT; y++) {
+                grid[x][y].point = new Point(x,y);
                 grid[x][y].f = 0;
                 grid[x][y].g = 0;
                 grid[x][y].h = 0;
@@ -296,7 +294,7 @@ var astar = {
                 if (!astar.is_present(openList, neighbor)) {
                     // This the the first time we have arrived at this node, it must be the // Also, we need to take the h (heuristic) score since we haven't done
                     gScoreIsBest = true;
-                    neighbor.h = distance(neighbor.pos, end.pos);
+                    neighbor.h = astar.heuristic(neighbor.pos, end.pos);
                     openList.push(neighbor);
                 }
                 else if (gScore < neighbor.g) {
