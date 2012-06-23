@@ -347,38 +347,3 @@ function follow_path(current_position, path) {
     }
     return PASS;
 }
-
-/*
- This will return an array containing the moves that needs to be performed to reach 
- from source to dest by following the shortest path. 
- */
-function shortest_path_between_points(source, dest) {
-    return recursive_path_calculator(new Array(), source, dest);
-}
-
-function recursive_path_calculator(result, source, dest) {
-    if (is_equal(source, dest)) {
-        return result;
-    } else if (source.x == dest.x) {
-        if (source.y > dest.y) {
-            result.push(NORTH);
-            return recursive_path_calculator(result, new Point(source.x, (source.y - 1)), dest);
-        } else {
-            result.push(SOUTH);
-            return recursive_path_calculator(result, new Point(source.x, (source.y + 1)), dest)
-        }
-    } else if (source.y == dest.y) {
-        if (source.x > dest.x) {
-            result.push(WEST);
-            return recursive_path_calculator(result, new Point((source.x - 1), source.y), dest);
-        } else {
-            result.push(EAST);
-            return recursive_path_calculator(result, new Point((source.x + 1), source.y), dest);
-        }
-    } else {
-        var intermediate_point = new Point(dest.x, source.y);
-        var path1 = recursive_path_calculator(new Array(), source, intermediate_point);
-        var path2 = recursive_path_calculator(new Array(), intermediate_point, dest);
-        return path1.concat(path2);
-    }
-}
