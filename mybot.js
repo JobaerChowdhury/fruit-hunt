@@ -36,6 +36,7 @@ function make_move() {
             var current_item = sorted_items[i];
             if (is_worthy(my_position, opponent_position, current_item)) {
                 //pursue the item
+                var test = find_astar_path(my_position, current_item.position);
                 return shortest_path_between_points(my_position, current_item.position).shift();
             }
         }
@@ -182,7 +183,7 @@ function distance(source, dest) {
 }
 
 function find_astar_path(source, dest) {
-     return astar.search(source, dest)
+    return astar.search(source, dest)
 }
 
 var astar = {
@@ -215,7 +216,7 @@ var astar = {
 
     index_of:function (nodeList, node) {
         for (var i = 0; i < nodeList.length; i++) {
-            if (is_equal(nodeList[i], node)) {
+            if (is_equal(nodeList[i].point, node.point)) {
                 return i;
             }
         }
@@ -223,17 +224,17 @@ var astar = {
     },
 
     is_present:function (nodeList, node) {
-        return astar.index_of(nodeList, node) > 0;
+        return astar.index_of(nodeList, node) >= 0;
     },
 
     remove_node:function (nodeList, node) {
         var index = astar.index_of(nodeList, node);
-        if (index > 0) {
-            nodeList.splice(i, 1);
+        if (index >= 0) {
+            nodeList.splice(index, 1);
         }
     },
 
-    heuristic: function (node1, node2) {
+    heuristic:function (node1, node2) {
         //todo - considering distance only for now, in future - rarity,chance will be considered as well.
         return distance(node1, node2);
     },
@@ -264,7 +265,8 @@ var astar = {
         for (var x = 0; x < WIDTH; x++) {
             grid[x] = [];
             for (var y = 0; y < HEIGHT; y++) {
-                grid[x][y].point = new Point(x,y);
+                grid[x][y] = {};
+                grid[x][y].point = new Point(x, y);
                 grid[x][y].f = 0;
                 grid[x][y].g = 0;
                 grid[x][y].h = 0;
@@ -301,7 +303,7 @@ var astar = {
                 if (!astar.is_present(openList, neighbor)) {
                     // This the the first time we have arrived at this node, it must be the // Also, we need to take the h (heuristic) score since we haven't done
                     gScoreIsBest = true;
-                    neighbor.h = astar.heuristic(neighbor.pos, end.pos);
+                    neighbor.h = astar.heuristic(neighbor.point, end_position);
                     openList.push(neighbor);
                 }
                 else if (gScore < neighbor.g) {
