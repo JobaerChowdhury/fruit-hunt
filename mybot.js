@@ -188,10 +188,6 @@ function find_astar_path(source, dest) {
 }
 
 var astar = {
-    init:function () {
-
-    },
-
     // todo - implement using priority queue or binary heap
     get_lowest:function (openList) {
         // Grab the lowest f(x) from the list
