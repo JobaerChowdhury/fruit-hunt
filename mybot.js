@@ -238,22 +238,28 @@ var astar = {
         return distance(node1, node2);
     },
 
-    neighbors:function (node) {
+    neighbors:function (node, grid) {
         var result = [];
-        if ((node.x + 1) >= WIDTH && (node.y + 1) >= HEIGHT) {
-        } else if ((node.x + 1) >= WIDTH && (node.y + 1) < HEIGHT) {
-            result.push(new Point(node.x, node.y + 1));
-        } else if ((node.x + 1) < WIDTH && (node.y + 1) >= HEIGHT) {
-            result.push(new Point(node.x + 1, node.y));
-        } else {
-            result.push(new Point(node.x, node.y + 1));
-            result.push(new Point(node.x + 1, node.y));
+        var x = node.point.x;
+        var y = node.point.y;
+
+        if (x + 1 < WIDTH) {
+            result.push(grid[x + 1][y]);
+        }
+        if (x - 1 >= 0) {
+            result.push(grid[x - 1][y]);
+        }
+        if (y + 1 < HEIGHT) {
+            result.push(grid[x][y + 1]);
+        }
+        if (y - 1 >= 0) {
+            result.push(grid[x][y - 1]);
         }
 
         return result;
     },
 
-search:function (start, end) {
+    search:function (start_position, end_position) {
         var grid = [];
         for (var x = 0; x < WIDTH; x++) {
             grid[x] = [];
@@ -268,11 +274,12 @@ search:function (start, end) {
 
         var openList = [];
         var closedList = [];
+        var start = grid[start_position.x][start_position.y];
         openList.push(start);
         while (openList.length > 0) {
             var currentNode = astar.get_lowest(openList);
             // End case -- result has been found, return the traced path
-            if (is_equal(currentNode, end)) {
+            if (is_equal(currentNode.point, end_position)) {
                 return astar.get_path_from_node(currentNode);
             }
 
@@ -280,7 +287,7 @@ search:function (start, end) {
             astar.remove_node(openList, currentNode);
             closedList.push(currentNode);
 
-            var neighbors = neighbors(currentNode);
+            var neighbors = astar.neighbors(currentNode, grid);
             for (var i = 0; i < neighbors.length; i++) {
                 var neighbor = neighbors[i];
                 if (astar.is_present(closedList, neighbor)) {
