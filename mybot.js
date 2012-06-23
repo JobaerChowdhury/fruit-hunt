@@ -1,5 +1,6 @@
 //todo - optimize javascript - minimize visibility, scopes etc - read the best practices and apply those
 //todo - there are a lot of top-level functions, may be that can be minimized.
+//todo - get rid of the data-structures and maybe use arrays instead - in a readable manner.
 function new_game() {
 
 }
@@ -169,6 +170,10 @@ function Point(x, y) {
     this.y = y;
 }
 
+function is_equal(first, second) {
+    return (first.x == second.x && first.y == second.y);
+}
+
 /*
  This will compute and return the Manhattan distance between source and destination.
  */
@@ -176,29 +181,130 @@ function distance(source, dest) {
     return Math.abs(dest.x - source.x) + Math.abs(dest.y - source.y);
 }
 
-
-
-function compute_reachability(source) {
-    var result = new Array();
-    var new_x = source.x + 1;
-    var new_y = source.y + 1;
-    if (new_x >= WIDTH && new_y >= HEIGHT) {
-    } else if (new_x >= WIDTH && new_y < HEIGHT) {
-        result.push(new Point(source.x, new_y));
-    } else if (new_x < WIDTH && new_y >= HEIGHT) {
-        result.push(new Point(new_x, source.y));
+function neighbors(node) {
+    var result = [];
+    if ((node.x + 1) >= WIDTH && (node.y + 1) >= HEIGHT) {
+    } else if ((node.x + 1) >= WIDTH && (node.y + 1) < HEIGHT) {
+        result.push(new Point(node.x, node.y + 1));
+    } else if ((node.x + 1) < WIDTH && (node.y + 1) >= HEIGHT) {
+        result.push(new Point(node.x + 1, node.y));
     } else {
-        result.push(new Point(source.x, new_y));
-        result.push(new Point(new_x, source.y));
+        result.push(new Point(node.x, node.y + 1));
+        result.push(new Point(node.x + 1, node.y));
     }
 
     return result;
 }
 
-function get_reachables(source) {
-    //todo - faster the implementation by storing the result into a map
-    return compute_reachability(source);
+function find_astar_path(source, dest) {
+
 }
+
+var astar = {
+    init:function () {
+        for (var x = 0; x < WIDTH; x++) {
+            for (var y = 0; y < HEIGHT; y++) {
+                grid[x][y].f = 0;
+                grid[x][y].g = 0;
+                grid[x][y].h = 0;
+                grid[x][y].parent = null;
+            }
+        }
+    },
+
+    // todo - implement using priority queue or binary heap
+    get_lowest:function (openList) {
+        // Grab the lowest f(x) from the list
+        var lowInd = 0;
+        for (var i = 0; i < openList.length; i++) {
+            if (openList[i].f < openList[lowInd].f) {
+                lowInd = i;
+            }
+        }
+
+        return openList[lowInd];
+    },
+
+    get_path_from_node:function (node) {
+        var curr = node;
+        var ret = [];
+        while (curr.parent) {
+            ret.push(curr);
+            curr = curr.parent;
+        }
+        return ret.reverse();
+    },
+
+    index_of:function (nodeList, node) {
+        for (var i = 0; i < nodeList.length; i++) {
+            if (is_equal(nodeList[i], node)) {
+                return i;
+            }
+        }
+        return -1;
+    },
+
+    is_present:function (nodeList, node) {
+        return astar.index_of(nodeList, node) > 0;
+    },
+
+    remove_node:function (nodeList, node) {
+        var index = astar.index_of(nodeList, node);
+        if (index > 0) {
+            nodeList.splice(i, 1);
+        }
+    },
+
+    search:function (grid, start, end) {
+        astar.init(grid);
+        var openList = [];
+        var closedList = [];
+        openList.push(start);
+        while (openList.length > 0) {
+            var currentNode = astar.get_lowest(openList);
+            // End case -- result has been found, return the traced path
+            if (is_equal(currentNode, end)) {
+                return astar.get_path_from_node(currentNode);
+            }
+
+            // Normal case -- move currentNode from open to closed, process each of its neighbors
+            astar.remove_node(openList, currentNode);
+            closedList.push(currentNode);
+
+            var neighbors = neighbors(currentNode);
+            for (var i = 0; i < neighbors.length; i++) {
+                var neighbor = neighbors[i];
+                if (astar.is_present(closedList, neighbor)) {
+                    // not a valid node to process, skip to next neighbor
+                    continue;
+                }
+
+                // g score is the shortest distance from start to current node, we need to check // the path we have arrived at this neighbor is the shortest one we have
+                var gScore = currentNode.g + 1; // 1 is the distance from a node to it's neighbor
+                var gScoreIsBest = false;
+                if (!astar.is_present(openList, neighbor)) {
+                    // This the the first time we have arrived at this node, it must be the // Also, we need to take the h (heuristic) score since we haven't done
+                    gScoreIsBest = true;
+                    neighbor.h = distance(neighbor.pos, end.pos);
+                    openList.push(neighbor);
+                }
+                else if (gScore < neighbor.g) {
+                    // We have already seen the node, but last time it had a worse g (distance
+                    gScoreIsBest = true;
+                }
+                if (gScoreIsBest) {
+                    // Found an optimal (so far) path to this node. Store info on how we // just how good it really is...
+                    neighbor.parent = currentNode;
+                    neighbor.g = gScore;
+                    neighbor.f = neighbor.g + neighbor.h;
+                }
+            }
+        }
+
+        // No result was found -- empty array signifies failure to find path
+        return [];
+    }
+};
 
 /*
  This will return an array containing the moves that needs to be performed to reach 
@@ -209,7 +315,7 @@ function shortest_path_between_points(source, dest) {
 }
 
 function recursive_path_calculator(result, source, dest) {
-    if (source.x == dest.x && source.y == dest.y) {
+    if (is_equal(source, dest)) {
         return result;
     } else if (source.x == dest.x) {
         if (source.y > dest.y) {
