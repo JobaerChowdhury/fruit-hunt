@@ -170,6 +170,14 @@ function Point(x, y) {
     this.y = y;
 }
 
+function Astar_point(p) {
+    this.point = p;
+    this.g = 0;
+    this.f = 0;
+    this.h = 0;
+    this.parent = null;
+}
+
 function is_equal(first, second) {
     return (first.x == second.x && first.y == second.y);
 }
@@ -197,19 +205,12 @@ function neighbors(node) {
 }
 
 function find_astar_path(source, dest) {
-
+     return astar.search(source, dest)
 }
 
 var astar = {
     init:function () {
-        for (var x = 0; x < WIDTH; x++) {
-            for (var y = 0; y < HEIGHT; y++) {
-                grid[x][y].f = 0;
-                grid[x][y].g = 0;
-                grid[x][y].h = 0;
-                grid[x][y].parent = null;
-            }
-        }
+
     },
 
     // todo - implement using priority queue or binary heap
@@ -255,8 +256,18 @@ var astar = {
         }
     },
 
-    search:function (grid, start, end) {
-        astar.init(grid);
+    search:function (start, end) {
+        var grid = [];
+        for (var x = 0; x < WIDTH; x++) {
+            grid[x] = [];
+            for (var y = 0; y < HEIGHT; y++) {
+                grid[x][y].f = 0;
+                grid[x][y].g = 0;
+                grid[x][y].h = 0;
+                grid[x][y].parent = null;
+            }
+        }
+
         var openList = [];
         var closedList = [];
         openList.push(start);
