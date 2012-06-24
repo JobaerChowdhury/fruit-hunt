@@ -79,20 +79,19 @@ function opponent_has_more_than_half(item_type) {
     var total = get_total_item_count(item_type);
     var opponent_has = get_opponent_item_count(item_type);
 
-    return opponent_has > Math.floor(total / 2.0);
+    return opponent_has > (total / 2.0);
 }
 
 function i_have_more_than_half(item_type) {
     var total = get_total_item_count(item_type);
     var i_have = get_my_item_count(item_type);
 
-    return i_have > Math.floor(total / 2.0);
+    return i_have > (total / 2.0);
 }
 
 function to_win(item_type) {
     var total = get_total_item_count(item_type);
-    return Math.ceil(total / 2.0);
-
+    return (total / 2.0);
 }
 
 function how_many_i_need(item_type) {
@@ -254,19 +253,20 @@ var astar = {
         var h_val = 1;
 
         if(item > 0){
-            if(is_beneficial(item)){
-                var i_need, opp_need;
-                i_need = how_many_i_need(item);
-                opp_need = how_many_opponent_need(item);
-                if(i_need >= opp_need) {
-                    h_val = 1 - (1.0 / i_need);
-                } else {
-                    h_val = 1 - (1.0 / (i_need + (opp_need - i_need)));
-                }
-            }
+            h_val =0;
+//            if(is_beneficial(item)){
+//                var i_need, opp_need;
+//                i_need = how_many_i_need(item);
+//                opp_need = how_many_opponent_need(item);
+//                if(i_need >= opp_need) {
+//                    h_val = 1 - (1.0 / i_need);
+//                } else {
+//                    h_val = 1 - (1.0 / (i_need + (opp_need - i_need)));
+//                }
+//            }
         }
 
-        return dist + h_val;
+        return (dist * 1) + h_val;
     },
 
     neighbors:function (node, grid) {
