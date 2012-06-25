@@ -25,7 +25,90 @@ function make_move() {
     // which one is closes?
     // is it worth to pursue it - if yes, then go for that direction
 
-   return initial_pursue(my_position, opponent_position);
+    return follow_heated_items(my_position, opponent_position, board);
+
+    //return initial_pursue(my_position, opponent_position);
+}
+
+function follow_heated_items(my_position, opponent_position, board) {
+    var grid = [];
+    initialize_grid(grid, board, my_position, opponent_position);
+    var most_heated = get_most_heated_item(grid);
+    if(most_heated == undefined) {
+        return make_random_move();
+    } else {
+        var path = find_astar_path(my_position, most_heated.point);
+        return follow_path(my_position, path);
+    }
+}
+
+function get_most_heated_item(grid) {
+    var heated = [];
+
+    var highest_heat = 0;
+    for(var x=0; x<WIDTH; x++) {
+        for(var y=0; y<HEIGHT; y++) {
+            var current_heat = grid[x][y].heat;
+            if(current_heat > highest_heat) {
+                highest_heat = current_heat;
+            }
+        }
+    }
+
+    for(var j=0; j<WIDTH; j++) {
+        for(var k=0; k<HEIGHT; k++) {
+          if(grid[j][k].heat == highest_heat) {
+              heated.push(grid[j][k]);
+          }
+        }
+    }
+
+    if(heated.length == 1) {
+        return heated[0];
+    }
+
+    var rarest = 0;
+    var result;
+    for(var i=0; i<heated.length; i++) {
+        if(heated[i].rarity > rarest) {
+            rarest = heated[i].rarity;
+            result = heated[i];
+        }
+    }
+
+    return result;
+}
+
+function initialize_grid(grid, board, my_position, opponent_position) {
+    for (var x = 0; x < WIDTH; x++) {
+        grid[x] = [];
+        for (var y = 0; y < HEIGHT; y++) {
+            grid[x][y] = {};
+            grid[x][y].point = new Point(x, y);
+            grid[x][y].item_type = board[x][y];
+            calculate_heat(grid[x][y], my_position, opponent_position);
+        }
+    }
+}
+
+function calculate_heat(item, my_position, opponent_position) {
+    if (item.item_type == 0) {
+        item.heat = 0;
+    } else {
+        var iw = how_many_i_need(item.item_type);
+        var ow = how_many_opponent_need(item.item_type);
+        var ab = get_available_on_board(item.item_type);
+        var dist = distance(my_position, item.point);
+
+        var rarity = (iw / ab ) * 10;
+
+        item.heat = rarity * rarity * (1.0 / dist);
+        item.rarity = rarity;
+    }
+}
+
+function get_available_on_board(item_type) {
+    return get_total_item_count(item_type) - (get_my_item_count(item_type) + get_opponent_item_count(item_type));
 }
 
 function initial_pursue(my_position, opponent_position) {
@@ -96,13 +179,13 @@ function i_have_more_than_half(item_type) {
 
 function to_win(item_type) {
     var total = get_total_item_count(item_type);
-    return (total / 2.0);
+    return Math.ceil(total / 2.0);
 }
 
 function how_many_i_need(item_type) {
     var needed = to_win(item_type);
     var i_have = get_my_item_count(item_type);
-    return to_win - i_have;
+    return needed - i_have;
 }
 
 function how_many_opponent_need(item_type) {
@@ -259,16 +342,16 @@ var astar = {
 
         if(item > 0){
             h_val =0;
-//            if(is_beneficial(item)){
-//                var i_need, opp_need;
-//                i_need = how_many_i_need(item);
-//                opp_need = how_many_opponent_need(item);
-//                if(i_need >= opp_need) {
-//                    h_val = 1 - (1.0 / i_need);
-//                } else {
-//                    h_val = 1 - (1.0 / (i_need + (opp_need - i_need)));
-//                }
-//            }
+            if(is_beneficial(item)){
+                var i_need, opp_need;
+                i_need = how_many_i_need(item);
+                opp_need = how_many_opponent_need(item);
+                if(i_need >= opp_need) {
+                    h_val = 1 - (1.0 / i_need);
+                } else {
+                    h_val = 1 - (1.0 / (i_need + (opp_need - i_need)));
+                }
+            }
         }
 
         return (dist * 1) + h_val;
@@ -364,6 +447,10 @@ var astar = {
  * */
 function follow_path(current_position, path) {
     var next_node = path[0];
+    if(next_node == undefined) {
+        return PASS;
+    }
+
     if (current_position.x == next_node.x) {
         if (next_node.y > current_position.y) {
             return SOUTH;
