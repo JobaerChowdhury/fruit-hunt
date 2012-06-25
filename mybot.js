@@ -12,7 +12,7 @@ function make_move() {
     var item_type = board[get_my_x()][get_my_y()];
     if (item_type > 0) {
         // todo - need to improve this .... like if pursuing a hot item, don't need to stop in the way.
-        if (is_beneficial(new Item(item_type, new Point(get_my_x(), get_my_y())))) {
+        if (is_beneficial(item_type)) {
             return TAKE;
         }
     }
@@ -34,6 +34,9 @@ function follow_heated_items(my_position, opponent_position, board) {
     var grid = [];
     initialize_grid(grid, board, my_position, opponent_position);
     var most_heated = get_most_heated_item(grid);
+//    console.log(most_heated.heat);
+//    console.log(most_heated.rarity);
+//    console.log(most_heated.point);
     if(most_heated == undefined) {
         return make_random_move();
     } else {
@@ -94,13 +97,17 @@ function initialize_grid(grid, board, my_position, opponent_position) {
 function calculate_heat(item, my_position, opponent_position) {
     if (item.item_type == 0) {
         item.heat = 0;
+        item.rarity = 0;
+    } else if (!is_beneficial(item.item_type)) {
+        item.heat = 0;
+        item.rarity = 0;
     } else {
         var iw = how_many_i_need(item.item_type);
         var ow = how_many_opponent_need(item.item_type);
         var ab = get_available_on_board(item.item_type);
         var dist = distance(my_position, item.point);
 
-        var rarity = (iw / ab ) * 10;
+        var rarity = (1 / iw ) * 10;
 
         item.heat = rarity * rarity * (1.0 / dist);
         item.rarity = rarity;
@@ -111,42 +118,6 @@ function get_available_on_board(item_type) {
     return get_total_item_count(item_type) - (get_my_item_count(item_type) + get_opponent_item_count(item_type));
 }
 
-function initial_pursue(my_position, opponent_position) {
-    var available_map = get_total_sorted_by_availability();
-    while (available_map.length > 0) {
-        var current = available_map.shift();
-        var current_type = current.item_type;
-
-        var all_items_of_type = get_existing_items_of_type(current_type);
-
-        var sorted_items = get_items_sorted_by_closeness(my_position, all_items_of_type);
-        for (var i = 0; i < sorted_items.length; i++) {
-            var current_item = sorted_items[i];
-            if (is_worthy(my_position, opponent_position, current_item)) {
-                //pursue the item
-                var path = find_astar_path(my_position, current_item.position);
-                return follow_path(my_position, path);
-            }
-        }
-    }
-
-    //todo - find better alternative than this. - like pursue closes item.
-    //if nothing matches above then return a random move
-    return make_random_move();
-}
-
-function get_total_sorted_by_availability() {
-    var available_map = get_available_total();
-
-    //now sort this according to minimum number available.
-    function sortByAvailability(a, b) {
-        return ((a.available < b.available) ? -1 : ((a.available > b.available) ? 1 : 0));
-    }
-
-    available_map.sort(sortByAvailability);
-
-    return available_map;
-}
 
 function make_random_move() {
     var rand = Math.random() * 4;
@@ -159,8 +130,8 @@ function make_random_move() {
     return PASS;
 }
 
-function is_beneficial(target_item) {
-    return !opponent_has_more_than_half(target_item.item_type) && !i_have_more_than_half(target_item.item_type);
+function is_beneficial(item_type) {
+    return !opponent_has_more_than_half(item_type) && !i_have_more_than_half(item_type);
 }
 
 function opponent_has_more_than_half(item_type) {
@@ -199,7 +170,7 @@ function is_worthy(my_position, opponent_position, target_item) {
         return distance(my_position, target_item.position) <= distance(opponent_position, target_item.position);
     }
 
-    return opponent_is_not_closer() && is_beneficial(target_item);
+    return opponent_is_not_closer() && is_beneficial(target_item.item_type);
 }
 
 function get_items_sorted_by_closeness(my_position, items) {
