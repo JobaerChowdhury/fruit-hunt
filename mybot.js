@@ -11,6 +11,7 @@ function make_move() {
     // only take if it is worthy!
     var item_type = board[get_my_x()][get_my_y()];
     if (item_type > 0) {
+        // todo - need to improve this .... like if pursuing a hot item, don't need to stop in the way.
         if (is_beneficial(new Item(item_type, new Point(get_my_x(), get_my_y())))) {
             return TAKE;
         }
@@ -24,6 +25,10 @@ function make_move() {
     // which one is closes?
     // is it worth to pursue it - if yes, then go for that direction
 
+   return initial_pursue(my_position, opponent_position);
+}
+
+function initial_pursue(my_position, opponent_position) {
     var available_map = get_total_sorted_by_availability();
     while (available_map.length > 0) {
         var current = available_map.shift();
