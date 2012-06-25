@@ -11,11 +11,8 @@ function make_move() {
     var item_type = board[get_my_x()][get_my_y()];
     if (item_type > 0) {
         var item_rarity = calculate_rarity(item_type);
-        console.log("item rarity is " + item_rarity + " and goal_rarity is " + goal_rarity);
         var significant_difference = differs_significantly(goal_rarity, item_rarity);
-        console.log(significant_difference);
         if (is_beneficial(item_type) && !significant_difference) {
-            console.log("returning take....");
             return TAKE;
         }
     }
@@ -108,6 +105,7 @@ function calculate_heat(item, my_position, opponent_position) {
 function calculate_heat_for_item_type(item_type, my_position, point) {
     var rarity = calculate_rarity(item_type);
     var dist = distance(my_position, point);
+    if(dist == 0) dist = 0.9; // avoid divide by 0
 
     return rarity * rarity * (1.0 / dist);
 }
