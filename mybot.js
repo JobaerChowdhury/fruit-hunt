@@ -8,11 +8,14 @@ function new_game() {
 function make_move() {
     var board = get_board();
 
-    // only take if it is worthy!
     var item_type = board[get_my_x()][get_my_y()];
     if (item_type > 0) {
-        // todo - need to improve this .... like if pursuing a hot item, don't need to stop in the way.
-        if (is_beneficial(item_type)) {
+        var item_rarity = calculate_rarity(item_type);
+        console.log("item rarity is " + item_rarity + " and goal_rarity is " + goal_rarity);
+        var significant_difference = differs_significantly(goal_rarity, item_rarity);
+        console.log(significant_difference);
+        if (is_beneficial(item_type) && !significant_difference) {
+            console.log("returning take....");
             return TAKE;
         }
     }
@@ -20,26 +23,17 @@ function make_move() {
     var my_position = new Point(get_my_x(), get_my_y());
     var opponent_position = new Point(get_opponent_x(), get_opponent_y());
 
-    //start with the least available item
-    // find all the occurrences of it in the board
-    // which one is closes?
-    // is it worth to pursue it - if yes, then go for that direction
-
     return follow_heated_items(my_position, opponent_position, board);
-
-    //return initial_pursue(my_position, opponent_position);
 }
 
 function follow_heated_items(my_position, opponent_position, board) {
     var grid = [];
     initialize_grid(grid, board, my_position, opponent_position);
     var most_heated = get_most_heated_item(grid);
-//    console.log(most_heated.heat);
-//    console.log(most_heated.rarity);
-//    console.log(most_heated.point);
-    if(most_heated == undefined) {
+    if (most_heated == undefined) {
         return make_random_move();
     } else {
+        goal_rarity = most_heated.rarity;
         var path = find_astar_path(my_position, most_heated.point);
         return follow_path(my_position, path);
     }
@@ -49,31 +43,31 @@ function get_most_heated_item(grid) {
     var heated = [];
 
     var highest_heat = 0;
-    for(var x=0; x<WIDTH; x++) {
-        for(var y=0; y<HEIGHT; y++) {
+    for (var x = 0; x < WIDTH; x++) {
+        for (var y = 0; y < HEIGHT; y++) {
             var current_heat = grid[x][y].heat;
-            if(current_heat > highest_heat) {
+            if (current_heat > highest_heat) {
                 highest_heat = current_heat;
             }
         }
     }
 
-    for(var j=0; j<WIDTH; j++) {
-        for(var k=0; k<HEIGHT; k++) {
-          if(grid[j][k].heat == highest_heat) {
-              heated.push(grid[j][k]);
-          }
+    for (var j = 0; j < WIDTH; j++) {
+        for (var k = 0; k < HEIGHT; k++) {
+            if (grid[j][k].heat == highest_heat) {
+                heated.push(grid[j][k]);
+            }
         }
     }
 
-    if(heated.length == 1) {
+    if (heated.length == 1) {
         return heated[0];
     }
 
     var rarest = 0;
     var result;
-    for(var i=0; i<heated.length; i++) {
-        if(heated[i].rarity > rarest) {
+    for (var i = 0; i < heated.length; i++) {
+        if (heated[i].rarity > rarest) {
             rarest = heated[i].rarity;
             result = heated[i];
         }
@@ -94,6 +88,10 @@ function initialize_grid(grid, board, my_position, opponent_position) {
     }
 }
 
+function differs_significantly(rarity1, rarity2) {
+    return rarity1 > 2.1 * rarity2; // more than double
+}
+
 function calculate_heat(item, my_position, opponent_position) {
     if (item.item_type == 0) {
         item.heat = 0;
@@ -102,16 +100,24 @@ function calculate_heat(item, my_position, opponent_position) {
         item.heat = 0;
         item.rarity = 0;
     } else {
-        var iw = how_many_i_need(item.item_type);
-        var ow = how_many_opponent_need(item.item_type);
-        var ab = get_available_on_board(item.item_type);
-        var dist = distance(my_position, item.point);
-
-        var rarity = (1 / iw ) * 10;
-
-        item.heat = rarity * rarity * (1.0 / dist);
-        item.rarity = rarity;
+        item.rarity = calculate_rarity(item.item_type);
+        item.heat = calculate_heat_for_item_type(item.item_type, my_position, item.point);
     }
+}
+
+function calculate_heat_for_item_type(item_type, my_position, point) {
+    var rarity = calculate_rarity(item_type);
+    var dist = distance(my_position, point);
+
+    return rarity * rarity * (1.0 / dist);
+}
+
+function calculate_rarity(item_type) {
+    var iw = how_many_i_need(item_type);
+    var ow = how_many_opponent_need(item_type);
+    var ab = get_available_on_board(item_type);
+
+    return (1 / iw ) * 10;
 }
 
 function get_available_on_board(item_type) {
@@ -163,81 +169,6 @@ function how_many_opponent_need(item_type) {
     var needed = to_win(item_type);
     var he_has = get_opponent_item_count(item_type);
     return needed - he_has;
-}
-
-function is_worthy(my_position, opponent_position, target_item) {
-    function opponent_is_not_closer() {
-        return distance(my_position, target_item.position) <= distance(opponent_position, target_item.position);
-    }
-
-    return opponent_is_not_closer() && is_beneficial(target_item.item_type);
-}
-
-function get_items_sorted_by_closeness(my_position, items) {
-    function comparator_by_distance(a, b) {
-        var distance_from_a = distance(my_position, a.position);
-        var distance_from_b = distance(my_position, b.position);
-        return ((distance_from_a < distance_from_b) ? -1 : ((distance_from_a > distance_from_b) ? 1 : 0));
-    }
-
-    return items.sort(comparator_by_distance);
-}
-
-function get_existing_items_of_type(item_type) {
-    var result = new Array();
-
-    var available_items = get_available_items();
-    for (var i = 0; i < available_items.length; i++) {
-        var item = available_items[i];
-        if (item.item_type == item_type) {
-            result.push(item);
-        }
-    }
-
-    return result;
-}
-
-/*
- Returns a map - containing the number of items available for picking or owned. This map will be used 
- to determine which item-type we should target next.
- */
-function get_available_total() {
-    var number_it = get_number_of_item_types();
-
-    var available_total = new Array();
-    for (var i = 1; i <= number_it; i++) {
-        var available = get_total_item_count(i) - get_opponent_item_count(i);
-        available_total.push(new ItemAvailability(i, available));
-    }
-    return available_total;
-}
-
-function get_available_items() {
-    var available_items = new Array();
-
-    var board = get_board();
-    for (var i = 0; i < WIDTH; i++) {
-        for (var j = 0; j < HEIGHT; j++) {
-            var item_type = board[i][j];
-            if (item_type > 0) {
-                var p = new Point(i, j);
-                available_items.push(new Item(item_type, p));
-            }
-        }
-    }
-
-    return available_items;
-}
-
-function Item(item_type, point) {
-    this.item_type = item_type;
-    this.position = point;
-}
-
-
-function ItemAvailability(item_type, available) {
-    this.item_type = item_type;
-    this.available = available;
 }
 
 function Point(x, y) {
@@ -311,13 +242,13 @@ var astar = {
         var item = get_board()[node.x][node.y];
         var h_val = 1;
 
-        if(item > 0){
-            h_val =0;
-            if(is_beneficial(item)){
+        if (item > 0) {
+            h_val = 0;
+            if (is_beneficial(item)) {
                 var i_need, opp_need;
                 i_need = how_many_i_need(item);
                 opp_need = how_many_opponent_need(item);
-                if(i_need >= opp_need) {
+                if (i_need >= opp_need) {
                     h_val = 1 - (1.0 / i_need);
                 } else {
                     h_val = 1 - (1.0 / (i_need + (opp_need - i_need)));
@@ -418,7 +349,7 @@ var astar = {
  * */
 function follow_path(current_position, path) {
     var next_node = path[0];
-    if(next_node == undefined) {
+    if (next_node == undefined) {
         return PASS;
     }
 
