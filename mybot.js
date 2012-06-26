@@ -24,10 +24,8 @@ function make_move() {
                 var significant_difference = differs_significantly(goal_rarity, item_rarity);
                 if (!significant_difference) {
                     return TAKE;
-                } else {
                 }
             }
-        } else {
         }
     }
 
@@ -286,6 +284,33 @@ function find_astar_path(source, dest) {
     return astar.search(source, dest)
 }
 
+/*
+ * Returns the direction to follow the path
+ * */
+function follow_path(current_position, path) {
+    var next_node = path[0];
+    if (next_node == undefined) {
+        return PASS;
+    }
+
+    if (current_position.x == next_node.x) {
+        if (next_node.y > current_position.y) {
+            return SOUTH;
+        }
+        else if (next_node.y < current_position.y) {
+            return NORTH;
+        }
+    } else {
+        if (next_node.x > current_position.x) {
+            // move right
+            return EAST;
+        } else {
+            return WEST;
+        }
+    }
+    return PASS;
+}
+
 var astar = {
     // todo - implement using priority queue or binary heap
     get_lowest:function (openList) {
@@ -438,30 +463,3 @@ var astar = {
         return [];
     }
 };
-
-/*
- * Returns the direction to follow the path
- * */
-function follow_path(current_position, path) {
-    var next_node = path[0];
-    if (next_node == undefined) {
-        return PASS;
-    }
-
-    if (current_position.x == next_node.x) {
-        if (next_node.y > current_position.y) {
-            return SOUTH;
-        }
-        else if (next_node.y < current_position.y) {
-            return NORTH;
-        }
-    } else {
-        if (next_node.x > current_position.x) {
-            // move right
-            return EAST;
-        } else {
-            return WEST;
-        }
-    }
-    return PASS;
-}
