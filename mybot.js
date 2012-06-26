@@ -15,7 +15,7 @@ function make_move() {
 
     var item_type = board[my_x][my_y];
     if (item_type > 0) {
-        var item_heat = calculate_heat_for_item_type(item_type, my_position, my_position);
+        var item_heat = calculate_heat_for_item_type(item_type, my_position, my_position, opponent_position);
         var significant_difference = differs_significantly(goal_heat, item_heat);
         if (is_beneficial(item_type) && !significant_difference) {
             return TAKE;
@@ -100,22 +100,35 @@ function calculate_heat(item, my_position, opponent_position) {
         item.rarity = 0;
     } else {
         item.rarity = calculate_rarity(item.item_type);
-        item.heat = calculate_heat_for_item_type(item.item_type, my_position, item.point);
+        item.heat = calculate_heat_for_item_type(item.item_type, my_position, item.point, opponent_position);
     }
 }
 
-function calculate_heat_for_item_type(item_type, my_position, point) {
+function calculate_heat_for_item_type(item_type, my_position, target, opponent_position) {
     var rarity = calculate_rarity(item_type);
-    var dist = distance(my_position, point);
-    if(dist == 0) dist = 0.9; // avoid divide by 0
+    var rarity_factor = rarity * rarity;
 
-    return rarity * rarity * (1.0 / dist);
+    var my_dist = distance(my_position, target);
+    if(my_dist == 0) my_dist = 0.9; // avoid divide by 0
+    var my_dist_factor = 1.0 / my_dist;
+
+    var oppo_dist = distance(opponent_position, target);
+    var diff = oppo_dist - my_dist;
+    var oppo_dist_factor;
+    if(diff >= 0) {
+      oppo_dist_factor = 1;
+    } else {
+        oppo_dist_factor = diff + 1;
+    }
+
+    return rarity_factor * my_dist_factor * oppo_dist_factor;
 }
 
 function calculate_rarity(item_type) {
+   // todo - how many opponent need - that should also influence negatively
     var iw = how_many_i_need(item_type);
-    var ow = how_many_opponent_need(item_type);
-    var ab = get_available_on_board(item_type);
+//    var ow = how_many_opponent_need(item_type);
+//    var ab = get_available_on_board(item_type);
 
     return (1 / iw ) * 10;
 }
