@@ -118,7 +118,7 @@ function calculate_heat_for_item_type(item_type, my_position, target, opponent_p
     if(diff >= 0) {
       oppo_dist_factor = 1;
     } else {
-        oppo_dist_factor = diff + 1;
+        oppo_dist_factor = (1.0 / diff + 1);
     }
 
     return rarity_factor * my_dist_factor * oppo_dist_factor;
