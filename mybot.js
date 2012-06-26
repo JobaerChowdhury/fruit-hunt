@@ -15,8 +15,10 @@ function make_move() {
 
     var item_type = board[my_x][my_y];
     if (item_type > 0) {
-        var item_heat = calculate_heat_for_item_type(item_type, my_position, my_position, opponent_position);
-        var significant_difference = differs_significantly(goal_heat, item_heat);
+//        var item_heat = calculate_heat_for_item_type(item_type, my_position, my_position, opponent_position);
+        var item_rarity = calculate_rarity(item_type);
+//        var significant_difference = differs_significantly(goal_heat, item_heat);
+        var significant_difference = differs_significantly(goal_rarity, item_rarity);
         if (is_beneficial(item_type) && !significant_difference) {
             return TAKE;
         }
@@ -32,7 +34,8 @@ function follow_heated_items(my_position, opponent_position, board) {
     if (most_heated == undefined) {
         return make_random_move();
     } else {
-        goal_heat = most_heated.heat;
+//        goal_heat = most_heated.heat;
+        goal_rarity = most_heated.rarity;
         var path = find_astar_path(my_position, most_heated.point);
         return follow_path(my_position, path);
     }
