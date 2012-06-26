@@ -1,6 +1,5 @@
 //todo - optimize javascript - minimize visibility, scopes etc - read the best practices and apply those
 //todo - there are a lot of top-level functions, may be that can be minimized.
-//todo - get rid of the data-structures and maybe use arrays instead - in a readable manner.
 function new_game() {
 
 }
@@ -8,17 +7,20 @@ function new_game() {
 function make_move() {
     var board = get_board();
 
-    var item_type = board[get_my_x()][get_my_y()];
+    var my_x = get_my_x();
+    var my_y = get_my_y();
+    var my_position = new Point(my_x, my_y);
+
+    var opponent_position = new Point(get_opponent_x(), get_opponent_y());
+
+    var item_type = board[my_x][my_y];
     if (item_type > 0) {
-        var item_rarity = calculate_rarity(item_type);
-        var significant_difference = differs_significantly(goal_rarity, item_rarity);
+        var item_heat = calculate_heat_for_item_type(item_type, my_position, my_position);
+        var significant_difference = differs_significantly(goal_heat, item_heat);
         if (is_beneficial(item_type) && !significant_difference) {
             return TAKE;
         }
     }
-
-    var my_position = new Point(get_my_x(), get_my_y());
-    var opponent_position = new Point(get_opponent_x(), get_opponent_y());
 
     return follow_heated_items(my_position, opponent_position, board);
 }
@@ -30,7 +32,7 @@ function follow_heated_items(my_position, opponent_position, board) {
     if (most_heated == undefined) {
         return make_random_move();
     } else {
-        goal_rarity = most_heated.rarity;
+        goal_heat = most_heated.heat;
         var path = find_astar_path(my_position, most_heated.point);
         return follow_path(my_position, path);
     }
@@ -85,8 +87,8 @@ function initialize_grid(grid, board, my_position, opponent_position) {
     }
 }
 
-function differs_significantly(rarity1, rarity2) {
-    return rarity1 > 2.1 * rarity2; // more than double
+function differs_significantly(heat1, heat2) {
+    return heat1 > 2.1 * heat2; // more than double
 }
 
 function calculate_heat(item, my_position, opponent_position) {
