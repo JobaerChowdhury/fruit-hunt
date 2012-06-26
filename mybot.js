@@ -213,11 +213,6 @@ function calculate_rarity(item_type) {
     return (1 / iw ) * 10;
 }
 
-function get_available_on_board(item_type) {
-    return get_total_item_count(item_type) - (get_my_item_count(item_type) + get_opponent_item_count(item_type));
-}
-
-
 function make_random_move() {
     var rand = Math.random() * 4;
 
