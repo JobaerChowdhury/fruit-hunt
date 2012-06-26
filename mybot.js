@@ -79,15 +79,80 @@ function get_most_heated_item(grid) {
 }
 
 function initialize_grid(grid, board, my_position, opponent_position) {
-    for (var x = 0; x < WIDTH; x++) {
-        grid[x] = [];
-        for (var y = 0; y < HEIGHT; y++) {
-            grid[x][y] = {};
-            grid[x][y].point = new Point(x, y);
-            grid[x][y].item_type = board[x][y];
-            calculate_heat(grid[x][y], my_position, opponent_position);
+    function calculate_individual_heat() {
+        for (var x = 0; x < WIDTH; x++) {
+            grid[x] = [];
+            for (var y = 0; y < HEIGHT; y++) {
+                grid[x][y] = {};
+                grid[x][y].point = new Point(x, y);
+                grid[x][y].item_type = board[x][y];
+                calculate_heat(grid[x][y], my_position, opponent_position);
+            }
         }
     }
+
+    //todo - too naive -- need to find a better way
+    function get_neighbors(grid, x, y) {
+        var result = [];
+        if((x-1) >= 0 && (y-1) >= 0) {
+            result.push(grid[x-1][y-1]);
+        }
+
+        if((y-1) >= 0) {
+            result.push(grid[x][y-1]);
+        }
+
+        if((x+1) < WIDTH && (y-1) >=0) {
+            result.push(grid[x+1][y-1]);
+        }
+
+        if((x-1) >= 0) {
+            result.push(grid[x-1][y]);
+        }
+
+        if((x+1) < WIDTH) {
+            result.push(grid[x+1][y]);
+        }
+
+        if((x-1) >=0 && (y+1) < HEIGHT) {
+            result.push(grid[x-1][y+1]);
+        }
+
+        if((y+1) <HEIGHT) {
+            result.push(grid[x][y+1]);
+        }
+
+        if((x+1) < WIDTH && (y+1) < HEIGHT) {
+            result.push(grid[x+1][y+1]);
+        }
+
+        return result;
+    }
+
+    /*
+    * Neighbors should contribute to heat calculation since we don't want to pursue a heated item
+    * standing alone in the corner. We want to move to an area which is more dense with items.
+    * */
+    function revise_heat_based_on_neighbors() {
+        for(var x=0; x<WIDTH; x++) {
+            for(var y=0; y<HEIGHT; y++) {
+                var current_item = grid[x][y];
+                if(current_item.heat <= 0) {
+                   continue;
+               } else {
+                    var neighbors = get_neighbors(grid, x, y);
+                    for(var i=0; i<neighbors.length; i++) {
+                        if(neighbors[i].heat > 0) {
+                            current_item.heat = 1.5 * current_item.heat; //todo - optimize the value based on experiment;
+                        }
+                    }
+               }
+            }
+        }
+    }
+
+    calculate_individual_heat();
+    revise_heat_based_on_neighbors();
 }
 
 function differs_significantly(heat1, heat2) {
