@@ -17,21 +17,17 @@ function make_move() {
     if (item_type > 0) {
         if (is_beneficial(item_type)) {
             if (opponent_is_away_enough(my_position, opponent_position, current_goal_point)) {
-                console.log("away enough ... taking ");
                 return TAKE;
             }
             else {
                 var item_rarity = calculate_rarity(item_type);
                 var significant_difference = differs_significantly(goal_rarity, item_rarity);
                 if (!significant_difference) {
-                    console.log("difference is less ... taking ");
                     return TAKE;
                 } else {
-                    console.log("diff significant ... not taking");
                 }
             }
         } else {
-            console.log("not beneficial ... not taking");
         }
     }
 
@@ -41,7 +37,6 @@ function make_move() {
 function opponent_is_away_enough(my_position, opponent_position, goal) {
     var my_distance = distance(my_position, goal);
     var opp_distance = distance(opponent_position, goal);
-    console.log(my_distance + "--"+ opp_distance);
     return (opp_distance - my_distance) > 1;
 }
 
