@@ -15,16 +15,34 @@ function make_move() {
 
     var item_type = board[my_x][my_y];
     if (item_type > 0) {
-//        var item_heat = calculate_heat_for_item_type(item_type, my_position, my_position, opponent_position);
-        var item_rarity = calculate_rarity(item_type);
-//        var significant_difference = differs_significantly(goal_heat, item_heat);
-        var significant_difference = differs_significantly(goal_rarity, item_rarity);
-        if (is_beneficial(item_type) && !significant_difference) {
-            return TAKE;
+        if (is_beneficial(item_type)) {
+            if (opponent_is_away_enough(my_position, opponent_position, current_goal_point)) {
+                console.log("away enough ... taking ");
+                return TAKE;
+            }
+            else {
+                var item_rarity = calculate_rarity(item_type);
+                var significant_difference = differs_significantly(goal_rarity, item_rarity);
+                if (!significant_difference) {
+                    console.log("difference is less ... taking ");
+                    return TAKE;
+                } else {
+                    console.log("diff significant ... not taking");
+                }
+            }
+        } else {
+            console.log("not beneficial ... not taking");
         }
     }
 
     return follow_heated_items(my_position, opponent_position, board);
+}
+
+function opponent_is_away_enough(my_position, opponent_position, goal) {
+    var my_distance = distance(my_position, goal);
+    var opp_distance = distance(opponent_position, goal);
+    console.log(my_distance + "--"+ opp_distance);
+    return (opp_distance - my_distance) > 1;
 }
 
 function follow_heated_items(my_position, opponent_position, board) {
@@ -35,6 +53,7 @@ function follow_heated_items(my_position, opponent_position, board) {
         return make_random_move();
     } else {
 //        goal_heat = most_heated.heat;
+        current_goal_point = most_heated.point;
         goal_rarity = most_heated.rarity;
         var path = find_astar_path(my_position, most_heated.point);
         return follow_path(my_position, path);
@@ -156,7 +175,7 @@ function initialize_grid(grid, board, my_position, opponent_position) {
 }
 
 function differs_significantly(heat1, heat2) {
-    return heat1 > 2.1 * heat2; // more than double
+    return heat1 > 2.0 * heat2; // more than double
 }
 
 function calculate_heat(item, my_position, opponent_position) {
