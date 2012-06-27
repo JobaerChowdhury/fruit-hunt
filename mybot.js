@@ -16,7 +16,7 @@ function make_move() {
     var item_type = board[my_x][my_y];
     if (item_type > 0) {
         if (is_worthy(item_type)) {
-            if (opponent_is_away_enough(my_position, opponent_position, current_goal_point)) {
+            if (opponent_is_away_enough(my_position, opponent_position, current_goal_position)) {
                 return TAKE;
             }
             else {
@@ -46,7 +46,7 @@ function follow_heated_item(my_position, opponent_position, board) {
         return make_random_move();
     } else {
 //        goal_heat = most_heated.heat;
-        current_goal_point = most_heated.point;
+        current_goal_position = most_heated.point;
         goal_rarity = most_heated.rarity;
         var path = find_astar_path(my_position, most_heated.point);
         return follow_path(my_position, path);
@@ -155,7 +155,7 @@ function initialize_grid(grid, board, my_position, opponent_position) {
                     var neighbors = get_neighbors(grid, x, y);
                     for(var i=0; i<neighbors.length; i++) {
                         if(neighbors[i].heat > 0) {
-                            current_item.heat = 1.5 * current_item.heat; //todo - optimize the value based on experiment;
+                            current_item.heat = 2.0 * current_item.heat; //todo - optimize the value based on experiment;
                         }
                     }
                }
