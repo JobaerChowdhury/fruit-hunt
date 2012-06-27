@@ -15,13 +15,13 @@ function make_move() {
 
     var item_type = board[my_x][my_y];
     if (item_type > 0) {
-        if (is_beneficial(item_type)) {
+        if (is_worthy(item_type)) {
             if (opponent_is_away_enough(my_position, opponent_position, current_goal_point)) {
                 return TAKE;
             }
             else {
                 var item_rarity = calculate_rarity(item_type);
-                var significant_difference = differs_significantly(goal_rarity, item_rarity);
+                var significant_difference = is_difference_significant(goal_rarity, item_rarity);
                 if (!significant_difference) {
                     return TAKE;
                 }
@@ -29,7 +29,7 @@ function make_move() {
         }
     }
 
-    return follow_heated_items(my_position, opponent_position, board);
+    return follow_heated_item(my_position, opponent_position, board);
 }
 
 function opponent_is_away_enough(my_position, opponent_position, goal) {
@@ -38,7 +38,7 @@ function opponent_is_away_enough(my_position, opponent_position, goal) {
     return (opp_distance - my_distance) > 1;
 }
 
-function follow_heated_items(my_position, opponent_position, board) {
+function follow_heated_item(my_position, opponent_position, board) {
     var grid = [];
     initialize_grid(grid, board, my_position, opponent_position);
     var most_heated = get_most_heated_item(grid);
@@ -167,7 +167,7 @@ function initialize_grid(grid, board, my_position, opponent_position) {
     revise_heat_based_on_neighbors();
 }
 
-function differs_significantly(heat1, heat2) {
+function is_difference_significant(heat1, heat2) {
     return heat1 > 2.0 * heat2; // more than double
 }
 
@@ -175,7 +175,7 @@ function calculate_heat(item, my_position, opponent_position) {
     if (item.item_type == 0) {
         item.heat = 0;
         item.rarity = 0;
-    } else if (!is_beneficial(item.item_type)) {
+    } else if (!is_worthy(item.item_type)) {
         item.heat = 0;
         item.rarity = 0;
     } else {
@@ -208,7 +208,7 @@ function calculate_rarity(item_type) {
    // todo - how many opponent need - that should also influence negatively
     var iw = how_many_i_need(item_type);
 //    var ow = how_many_opponent_need(item_type);
-//    var ab = get_available_on_board(item_type);
+//    var ab = get_available_on_board(item_type);  //todo - this needs to be used somehow
 
     return (1 / iw ) * 10;
 }
@@ -224,7 +224,7 @@ function make_random_move() {
     return PASS;
 }
 
-function is_beneficial(item_type) {
+function is_worthy(item_type) {
     return !opponent_has_more_than_half(item_type) && !i_have_more_than_half(item_type);
 }
 
@@ -359,7 +359,7 @@ var astar = {
 
         if (item > 0) {
             h_val = 0;
-            if (is_beneficial(item)) {
+            if (is_worthy(item)) {
                 var i_need, opp_need;
                 i_need = how_many_i_need(item);
                 opp_need = how_many_opponent_need(item);
